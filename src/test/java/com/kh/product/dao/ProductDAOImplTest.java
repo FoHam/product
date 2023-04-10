@@ -1,5 +1,6 @@
 package com.kh.product.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
@@ -13,6 +14,7 @@ import java.util.Optional;
 @Slf4j
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@RequiredArgsConstructor
 public class ProductDAOImplTest {
   @Autowired
   private ProductDAO productDAO;
@@ -24,19 +26,28 @@ public class ProductDAOImplTest {
   @DisplayName("등록")
   void add(){
     List<Product> products = new ArrayList<>();
+    List<Long> productID = new ArrayList<>();
+
     for(int i=1; i<=COUNT; i++){
       products.add(new Product(null,"밥시간"+i,1L*i,10000L*i));
     }
     products.stream().forEach(product -> productIds.add(productDAO.add(product)));
 
     products.stream().forEach(product -> log.info("product={}",product));
+
+    for(int i=0; i<COUNT; i++){
+      Assertions.assertThat(productIds.get(i)).isGreaterThan(0);
+      log.info("productIds.get(i)={}",productIds.get(i));
+    }
   }
   @Test
   @Order(2)
   @DisplayName("조회")
   void search(){
+
     int idx = 0;
     Optional<Product> searchProduct = productDAO.search(productIds.get(idx));
+
     Product product = searchProduct.orElseThrow();
     Assertions.assertThat(product.getPname()).isEqualTo("밥시간"+(idx+1));
     Assertions.assertThat(product.getQuantity()).isEqualTo(1L*(idx+1));
